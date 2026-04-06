@@ -1,1 +1,833 @@
-in
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>VIBRA</title>
+<link rel="manifest" href="#" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #c8f135;
+    --accent2: #3df5c1;
+    --text: #e8e8f0;
+    --muted: #4a4a6a;
+    --danger: #ff4d6d;
+    --card: #13131c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Ambient background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: -10%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(ellipse, rgba(200,241,53,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -10%;
+    right: -10%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(ellipse, rgba(61,245,193,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 20px 100px;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 52px 0 32px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .logo {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .logo span { color: var(--text); }
+  .status-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--muted);
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all .4s;
+  }
+  .status-pill.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200,241,53,0.08);
+    box-shadow: 0 0 16px rgba(200,241,53,0.15);
+  }
+
+  /* MAIN TOGGLE */
+  .toggle-zone {
+    display: flex;
+    justify-content: center;
+    padding: 28px 0 36px;
+  }
+  .power-btn {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .power-btn::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1.5px solid transparent;
+    transition: all .4s;
+  }
+  .power-btn.on {
+    border-color: var(--accent);
+    box-shadow: 0 0 30px rgba(200,241,53,0.2), 0 0 60px rgba(200,241,53,0.08);
+  }
+  .power-btn.on::before {
+    border-color: rgba(200,241,53,0.3);
+    animation: spin 6s linear infinite;
+  }
+  .power-btn:active { transform: scale(0.94); }
+  .power-icon {
+    width: 44px;
+    height: 44px;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    transition: stroke .3s;
+  }
+  .power-btn.on .power-icon { stroke: var(--accent); }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    margin-top: 28px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+
+  /* SLIDER ROW */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 4px;
+  }
+  .slider-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    min-width: 140px;
+  }
+  .slider-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    text-align: right;
+    min-width: 60px;
+  }
+  .slider-sub { font-size: 11px; color: var(--muted); margin-top: 2px; margin-bottom: 10px; }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 10px rgba(200,241,53,0.4);
+    transition: transform .15s;
+  }
+  input[type=range]:active::-webkit-slider-thumb { transform: scale(1.2); }
+
+  /* PERIOD SELECTOR */
+  .period-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .period-btn {
+    padding: 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+  }
+  .period-btn.sel {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(61,245,193,0.07);
+  }
+
+  /* VIBRATION TYPE */
+  .vib-types {
+    display: flex;
+    gap: 8px;
+  }
+  .vib-btn {
+    flex: 1;
+    padding: 14px 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: all .2s;
+  }
+  .vib-btn .icon { font-size: 20px; }
+  .vib-btn.sel {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200,241,53,0.06);
+  }
+
+  /* PROGRESS / STATUS */
+  .progress-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 4px;
+    display: none;
+  }
+  .progress-card.visible { display: block; }
+  .prog-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .prog-title { font-size: 13px; color: var(--muted); }
+  .prog-val { font-family: 'Space Mono', monospace; font-size: 14px; color: var(--text); }
+  .prog-bar-bg {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .prog-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px;
+    transition: width .6s ease;
+  }
+  .next-vib {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .next-vib span { color: var(--accent2); }
+
+  /* PULSE ANIMATION on vibe */
+  .pulse-ring {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .pulse-ring.fire {
+    animation: pulseout .6s ease-out forwards;
+  }
+  @keyframes pulseout {
+    0% { transform: translate(-50%,-50%) scale(0.5); opacity: .8; }
+    100% { transform: translate(-50%,-50%) scale(2); opacity: 0; }
+  }
+
+  /* LOG */
+  .log-list {
+    max-height: 140px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .log-list::-webkit-scrollbar { display: none; }
+  .log-item {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    display: flex;
+    justify-content: space-between;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-item .lt { color: var(--accent2); }
+
+  /* INSTALL BANNER */
+  .install-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 100;
+    transform: translateY(100%);
+    transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .install-banner.show { transform: translateY(0); }
+  .install-text { font-size: 12px; color: var(--muted); flex: 1; }
+  .install-text strong { color: var(--text); display: block; font-size: 14px; }
+  .install-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .dismiss-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  /* NOTIF warning */
+  .notif-warn {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: rgba(255,77,109,0.8);
+    display: none;
+  }
+  .notif-warn.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="pulse-ring" id="pulseRing"></div>
+
+<div class="app">
+  <div class="header">
+    <div class="logo">VIBR<span>A</span></div>
+    <div class="status-pill" id="statusPill">INACTIF</div>
+  </div>
+
+  <!-- POWER BUTTON -->
+  <div class="toggle-zone">
+    <button class="power-btn" id="powerBtn" onclick="togglePower()">
+      <svg class="power-icon" viewBox="0 0 24 24">
+        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+        <line x1="12" y1="2" x2="12" y2="12"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- VIBRATION COUNT -->
+  <div class="section-label">Nombre de vibrations</div>
+  <div class="card">
+    <div class="slider-row">
+      <div class="slider-label">Vibrations / période</div>
+      <div class="slider-val" id="countVal">12</div>
+    </div>
+    <div class="slider-sub">Réparties aléatoirement · min. 5 min d'écart</div>
+    <input type="range" id="countSlider" min="1" max="100" value="12" oninput="updateCount(this.value)">
+  </div>
+
+  <!-- PERIOD -->
+  <div class="section-label">Durée de la période</div>
+  <div class="card">
+    <div class="period-grid">
+      <button class="period-btn sel" data-h="24" onclick="setPeriod(this)">24 h</button>
+      <button class="period-btn" data-h="48" onclick="setPeriod(this)">48 h</button>
+      <button class="period-btn" data-h="72" onclick="setPeriod(this)">72 h</button>
+      <button class="period-btn" data-h="168" onclick="setPeriod(this)">7 jours</button>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="section-label" style="margin-top:0; margin-bottom:8px;">Durée personnalisée</div>
+      <div class="slider-row">
+        <div class="slider-label">Heures</div>
+        <div class="slider-val" id="customHVal">24</div>
+      </div>
+      <input type="range" id="customSlider" min="24" max="720" value="24" step="1" oninput="setCustomPeriod(this.value)">
+    </div>
+  </div>
+
+  <!-- VIBRATION TYPE -->
+  <div class="section-label">Type de vibration</div>
+  <div class="card">
+    <div class="vib-types">
+      <button class="vib-btn sel" data-type="single" onclick="setVibType(this)">
+        <span class="icon">▪</span>
+        <span>Simple</span>
+      </button>
+      <button class="vib-btn" data-type="double" onclick="setVibType(this)">
+        <span class="icon">▪▪</span>
+        <span>Double</span>
+      </button>
+      <button class="vib-btn" data-type="triple" onclick="setVibType(this)">
+        <span class="icon">▪▪▪</span>
+        <span>Triple</span>
+      </button>
+      <button class="vib-btn" data-type="long" onclick="setVibType(this)">
+        <span class="icon">▬</span>
+        <span>Longue</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STATUS CARD -->
+  <div class="progress-card" id="progressCard">
+    <div class="prog-row">
+      <span class="prog-title">Progression</span>
+      <span class="prog-val" id="progText">0 / 12</span>
+    </div>
+    <div class="prog-bar-bg">
+      <div class="prog-bar-fill" id="progBar" style="width:0%"></div>
+    </div>
+    <div class="prog-row">
+      <span class="prog-title">Temps écoulé</span>
+      <span class="prog-val" id="elapsedText">—</span>
+    </div>
+    <div class="prog-row" style="margin-bottom:0">
+      <span class="prog-title">Fin prévue</span>
+      <span class="prog-val" id="endText">—</span>
+    </div>
+    <div class="next-vib" id="nextVibText" style="margin-top:16px;">—</div>
+  </div>
+
+  <!-- LOG -->
+  <div class="section-label" id="logLabel" style="display:none">Historique</div>
+  <div class="card" id="logCard" style="display:none; padding: 14px 16px;">
+    <div class="log-list" id="logList"></div>
+  </div>
+
+  <div class="notif-warn" id="notifWarn">
+    ⚠️ Notifications non accordées. Activez-les dans les paramètres pour que les vibrations fonctionnent en arrière-plan.
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <div class="install-text">
+    <strong>Installer VIBRA</strong>
+    Accès rapide depuis l'écran d'accueil
+  </div>
+  <button class="install-btn" onclick="installApp()">Installer</button>
+  <button class="dismiss-btn" onclick="dismissInstall()">×</button>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────
+let isOn = false;
+let vibCount = 12;
+let periodHours = 24;
+let vibType = 'single';
+let scheduledTimes = [];
+let timers = [];
+let startTime = null;
+let endTime = null;
+let completedVibs = 0;
+let tickInterval = null;
+let deferredPrompt = null;
+let wakeLock = null;
+
+const VIB_PATTERNS = {
+  single: [80],
+  double: [80, 60, 80],
+  triple: [80, 60, 80, 60, 80],
+  long:   [350]
+};
+
+// ─── SCHEDULE GENERATOR ──────────────────────────
+function generateSchedule(start, end, count) {
+  const duration = end - start;
+  const minGap = 5 * 60 * 1000; // 5 min minimum
+
+  // Validate feasibility
+  if (duration < count * minGap) {
+    alert(`Impossible : ${count} vibrations en ${Math.round(duration/3600000)}h avec 5 min d'écart minimum.`);
+    return null;
+  }
+
+  let times = [];
+  let attempts = 0;
+  while (times.length < count && attempts < 10000) {
+    attempts++;
+    const t = start + Math.random() * duration;
+    let valid = true;
+    for (let existing of times) {
+      if (Math.abs(existing - t) < minGap) { valid = false; break; }
+    }
+    if (valid) times.push(t);
+  }
+  return times.sort((a, b) => a - b);
+}
+
+// ─── CORE TOGGLE ─────────────────────────────────
+function togglePower() {
+  if (!isOn) startSession();
+  else stopSession();
+}
+
+async function startSession() {
+  // Request notification permission for background
+  if ('Notification' in window) {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') {
+      document.getElementById('notifWarn').classList.add('show');
+    }
+  }
+
+  // Wake Lock to keep screen/cpu awake
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+
+  completedVibs = 0;
+  startTime = Date.now();
+  endTime = startTime + (periodHours * 3600000);
+
+  scheduledTimes = generateSchedule(startTime, endTime, vibCount);
+  if (!scheduledTimes) return;
+
+  isOn = true;
+  updateUI(true);
+  scheduleAll();
+  tickInterval = setInterval(updateProgress, 1000);
+  updateProgress();
+  logEvent('Session démarrée · ' + vibCount + ' vibrations sur ' + formatHours(periodHours));
+}
+
+function stopSession() {
+  isOn = false;
+  timers.forEach(clearTimeout);
+  timers = [];
+  clearInterval(tickInterval);
+  if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
+  updateUI(false);
+  document.getElementById('progressCard').classList.remove('visible');
+  document.getElementById('nextVibText').textContent = '—';
+  logEvent('Session arrêtée manuellement');
+}
+
+// ─── SCHEDULE TIMEOUTS ────────────────────────────
+function scheduleAll() {
+  timers.forEach(clearTimeout);
+  timers = [];
+  const now = Date.now();
+  scheduledTimes.forEach((t, i) => {
+    const delay = t - now;
+    if (delay > 0) {
+      const tid = setTimeout(() => fireVibration(i), delay);
+      timers.push(tid);
+    }
+  });
+  // Schedule end
+  const endDelay = endTime - now;
+  if (endDelay > 0) {
+    const tid = setTimeout(() => sessionComplete(), endDelay);
+    timers.push(tid);
+  }
+}
+
+function fireVibration(index) {
+  if (!isOn) return;
+  completedVibs++;
+
+  // Vibrate
+  if ('vibrate' in navigator) {
+    navigator.vibrate(VIB_PATTERNS[vibType]);
+  }
+
+  // Visual pulse
+  const ring = document.getElementById('pulseRing');
+  ring.classList.remove('fire');
+  void ring.offsetWidth;
+  ring.classList.add('fire');
+
+  // Notification (keeps it alive in background)
+  if (Notification.permission === 'granted') {
+    try {
+      new Notification('VIBRA', {
+        body: `Vibration ${completedVibs}/${vibCount}`,
+        silent: true,
+        tag: 'vibra-' + index
+      });
+    } catch(e) {}
+  }
+
+  logEvent(`Vibration ${completedVibs}/${vibCount} · ${new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'})}`);
+  updateProgress();
+}
+
+function sessionComplete() {
+  if (!isOn) return;
+  isOn = false;
+  clearInterval(tickInterval);
+  if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
+  updateUI(false);
+  logEvent('✓ Session terminée');
+  if (Notification.permission === 'granted') {
+    try {
+      new Notification('VIBRA', { body: 'Programme terminé — ' + completedVibs + ' vibrations envoyées.' });
+    } catch(e) {}
+  }
+}
+
+// ─── UI UPDATES ───────────────────────────────────
+function updateUI(on) {
+  const btn = document.getElementById('powerBtn');
+  const pill = document.getElementById('statusPill');
+  btn.classList.toggle('on', on);
+  pill.textContent = on ? 'ACTIF' : 'INACTIF';
+  pill.classList.toggle('active', on);
+  if (on) {
+    document.getElementById('progressCard').classList.add('visible');
+  }
+}
+
+function updateProgress() {
+  if (!isOn || !startTime) return;
+  const now = Date.now();
+  const elapsed = now - startTime;
+  const total = endTime - startTime;
+  const pct = Math.min(100, (elapsed / total) * 100);
+
+  document.getElementById('progText').textContent = completedVibs + ' / ' + vibCount;
+  document.getElementById('progBar').style.width = pct.toFixed(1) + '%';
+  document.getElementById('elapsedText').textContent = formatDuration(elapsed);
+  document.getElementById('endText').textContent = new Date(endTime).toLocaleString('fr-FR', {
+    day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'
+  });
+
+  // Next vibration
+  const upcoming = scheduledTimes.filter(t => t > now);
+  if (upcoming.length > 0) {
+    const diff = upcoming[0] - now;
+    document.getElementById('nextVibText').innerHTML =
+      'Prochaine vibration dans <span>' + formatDuration(diff) + '</span>';
+  } else {
+    document.getElementById('nextVibText').innerHTML = 'Dernière vibration envoyée';
+  }
+}
+
+function logEvent(msg) {
+  const logCard = document.getElementById('logCard');
+  const logLabel = document.getElementById('logLabel');
+  const logList = document.getElementById('logList');
+  logCard.style.display = 'block';
+  logLabel.style.display = 'block';
+
+  const item = document.createElement('div');
+  item.className = 'log-item';
+  const t = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  item.innerHTML = `<span>${msg}</span><span class="lt">${t}</span>`;
+  logList.insertBefore(item, logList.firstChild);
+}
+
+// ─── CONTROLS ─────────────────────────────────────
+function updateCount(v) {
+  vibCount = parseInt(v);
+  document.getElementById('countVal').textContent = v;
+}
+
+function setPeriod(btn) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  periodHours = parseInt(btn.dataset.h);
+  document.getElementById('customSlider').value = periodHours;
+  document.getElementById('customHVal').textContent = periodHours;
+}
+
+function setCustomPeriod(v) {
+  periodHours = parseInt(v);
+  document.getElementById('customHVal').textContent = v;
+  // Deselect preset buttons
+  const preset = document.querySelector(`.period-btn[data-h="${v}"]`);
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('sel'));
+  if (preset) preset.classList.add('sel');
+}
+
+function setVibType(btn) {
+  document.querySelectorAll('.vib-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  vibType = btn.dataset.type;
+}
+
+// ─── HELPERS ──────────────────────────────────────
+function formatDuration(ms) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const h = Math.floor(m / 60);
+  const d = Math.floor(h / 24);
+  if (d > 0) return `${d}j ${h % 24}h`;
+  if (h > 0) return `${h}h ${m % 60}m`;
+  if (m > 0) return `${m}m ${s % 60}s`;
+  return `${s}s`;
+}
+
+function formatHours(h) {
+  if (h < 24) return h + 'h';
+  if (h === 24) return '24h';
+  const days = Math.floor(h / 24);
+  const rem = h % 24;
+  return rem > 0 ? `${days}j ${rem}h` : `${days}j`;
+}
+
+// ─── PWA INSTALL ──────────────────────────────────
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      dismissInstall();
+    });
+  }
+}
+
+function dismissInstall() {
+  document.getElementById('installBanner').classList.remove('show');
+}
+
+// Re-acquire wake lock on visibility change
+document.addEventListener('visibilitychange', async () => {
+  if (isOn && document.visibilityState === 'visible' && 'wakeLock' in navigator) {
+    try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+  }
+});
+
+// Service Worker registration for true background
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    self.addEventListener('install', e => self.skipWaiting());
+    self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+    self.addEventListener('message', e => {
+      if (e.data && e.data.type === 'VIBRATE') {
+        // SW can't vibrate directly but keeps the app alive
+      }
+    });
+  `;
+  const blob = new Blob([swCode], {type: 'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+</script>
+</body>
+</html>
+
