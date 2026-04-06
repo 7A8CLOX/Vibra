@@ -1,0 +1,21 @@
+{
+  "name": "VIBRA",
+  "short_name": "VIBRA",
+  "start_url": "/Vibra/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/0a0a0f/c8f135?text=V",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/0a0a0f/c8f135?text=V",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
